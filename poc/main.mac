@@ -1,0 +1,22 @@
+n: 16;
+x[0]: 0;
+x[n + 1]: 0;
+x[i]:=concat(x, i);
+v[i]:=concat(v, i);
+a: 0;
+f[i]:=(x[i+1] + x[i-1] - 2*x[i]) + a * ((x[i+1] - x[i])^2 - (x[i] - x[i-1])^2);
+
+
+eq: append(makelist(f[i], i, n), makelist(v[i], i, n))$
+va: append(makelist(v[i], i, n), makelist(x[i], i, n))$
+va0: append(makelist(sin(2*%pi*i/(n + 1)), i, n), makelist(0, i, n))$
+
+dt: sqrt(1/8);
+so: rk(eq, va, va0, ['t, 0, 1, 0.01]);
+
+k: 1;
+a1: makelist(sum(so[j][i] * sin(i*k*%pi/n), i, 1, n), j, length(so)), numer $
+
+draw2d(points_joined = true, points(a1));
+
+
