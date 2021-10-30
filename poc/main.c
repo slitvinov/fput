@@ -44,16 +44,12 @@ int main(void) {
   double w;
   double x[2 * n];
   int i;
-  int j;
   int k;
   int l;
   int s;
+  int ns;
 
   a = 1.0 / 4;
-  gsl_odeiv2_system sys = {func, NULL, 2 * n, &a};
-  gsl_odeiv2_driver *d = gsl_odeiv2_driver_alloc_y_new(
-      &sys, gsl_odeiv2_step_rk4, 1e-3, 1e-8, 1e-8);
-
   for (i = 1; i <= n; i++) {
     x[i - 1] = sin(i * PI / n);
     x[i + n - 1] = 0;
@@ -62,6 +58,10 @@ int main(void) {
   t = 0;
   w = 2 * sqrt(a) * sin(PI / (2 * (n + 1)));
   T = 2 * PI / w;
+  ns = 10000;
+  gsl_odeiv2_system sys = {func, NULL, 2 * n, &a};
+  gsl_odeiv2_driver *d = gsl_odeiv2_driver_alloc_y_new(
+      &sys, gsl_odeiv2_step_rk4, T / ns, 1e-8, 1e-8);
   for (;;) {
     printf("%.16e ", t);
     for (k = 1; k <= n; k++) {
@@ -73,11 +73,11 @@ int main(void) {
         a1 += x[l + n - 1] * si;
       }
       si = sin(PI * k / (2 * n));
-      E = a1 * a1 / 2 + 2 * a0 * a0 * si * si;
+      E = a1 * a1 / 2 + 8 * a * a0 * a0 * si * si;
       printf(" %.16e", E);
     }
     printf("\n");
-    s = gsl_odeiv2_driver_apply_fixed_step(d, &t, T / 2000, 2000, x);
+    s = gsl_odeiv2_driver_apply_fixed_step(d, &t, T / ns, ns, x);
     if (s != GSL_SUCCESS) {
       fprintf(stderr, "error: driver returned %d\n", s);
       exit(1);
